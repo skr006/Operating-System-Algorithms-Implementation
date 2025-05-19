@@ -51,7 +51,7 @@ def roundRobin(lst:list,TQ:int):
             print(f"Process {i.pid}",end=" | ")
         print()
         
-
+    # Processes having remaining time less than time_quanta are executed based on their position in queue
     while q!=[]:
         x=q.pop(0)
         x.RemainingTime=x.RemainingTime-TQ
