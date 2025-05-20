@@ -4,6 +4,15 @@
 
 <p id="description">This repository contains Python implementations of key Operating System algorithms that are essential for understanding and developing system-level software. The objective of this project is to provide a structured reference for simulating and analyzing core OS concepts through clear and well-documented code.</p>
 
+<h2>Project Repository Structure</h2>
+```
+🔈Smallest-AI-API-Voice-Manipulation
+├── 📂 CPU_Scheduling
+├── .gitignore    
+├── LICENSE
+├── README.md
+```
+
 <h2>💻 Built with</h2>
 
 Technologies used in the project:
