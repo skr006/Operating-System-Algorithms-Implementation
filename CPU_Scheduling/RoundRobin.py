@@ -12,84 +12,92 @@ class Process:
         return f"Process {self.pid}: FinalTime={self.FinalTime}, TurnAroundTime={self.TurnAroundTime}, WaitingTime={self.WaitingTime}"
 
 
-# Main Algorithm
-def roundRobin(lst:list,TQ:int):
-    # Sort the processes based on Arrival Time
-    lst.sort(key=lambda x:x.ArrivalTime)
-    q=[lst[0]]
-    s=0
-    # Calculate the total burst time
-    for i in lst:
-        s+=i.BurstTime
-    j=1
-    l=[]
-    t=[]
-    t.append(0)
+# Round Robin Scheduling Algorithm
+def roundRobin(process_list: list, time_quantum: int):
+    # Sort processes by arrival time
+    process_list.sort(key=lambda p: p.ArrivalTime)
+    ready_queue = [process_list[0]]
+    total_burst = sum(p.BurstTime for p in process_list)
+    timeline = [0]
+    index = 1
+    executed_order = []
+
     print("Ready Queue:")
 
-    # Simulate the Round Robin Scheduling with the given time quantum as jump
-    for i in range(0,s,TQ):
+    # First Phase: Main Round Robin loop
+    for current_time in range(0, total_burst, time_quantum):
+        current_proc = ready_queue.pop(0)
+        current_proc.RemainingTime -= time_quantum
+        executed_order.append(current_proc)
 
-        x=q.pop(0)
-        x.RemainingTime=x.RemainingTime-TQ
-        l.append(x)
-        for h in range(j,len(lst)):
-            if lst[h].ArrivalTime<=i+TQ:
-                q.append(lst[h])
-                j+=1
-        
-        if x.RemainingTime>0:
-            q.append(x)
-            t.append(t[len(l)-1]+TQ)
-        elif x.RemainingTime<=0:
-            if x.RemainingTime==0:
-                t.append(t[len(l)-1]+TQ)
+        # Enqueue new arrivals
+        for i in range(index, len(process_list)):
+            if process_list[i].ArrivalTime <= current_time + time_quantum:
+                ready_queue.append(process_list[i])
+                index += 1
+
+        # Add back if not finished
+        if current_proc.RemainingTime > 0:
+            ready_queue.append(current_proc)
+            timeline.append(timeline[-1] + time_quantum)
+        else:
+            # Adjust if over-executed
+            if current_proc.RemainingTime == 0:
+                timeline.append(timeline[-1] + time_quantum)
             else:
-                t.append(t[len(l)-1]+TQ+x.RemainingTime)
-        
-        for i in q:
-            print(f"Process {i.pid}",end=" | ")
+                timeline.append(timeline[-1] + time_quantum + current_proc.RemainingTime)
+
+        # Print current ready queue
+        for proc in ready_queue:
+            print(f"Process {proc.pid}", end=" | ")
         print()
-        
-    # Processes having remaining time less than time_quanta are executed based on their position in queue
-    while q!=[]:
-        x=q.pop(0)
-        x.RemainingTime=x.RemainingTime-TQ
-        l.append(x)
-        if x.RemainingTime>0:
-            q.append(x)
-            t.append(t[len(l)-1]+TQ)
-        elif x.RemainingTime<=0:
-            if x.RemainingTime==0:
-                t.append(t[len(l)-1]+TQ)
-            else:
-                t.append(t[len(l)-1]+TQ+x.RemainingTime)
-    print("\nGant Chart:")
-    for i in l:
-        print(f"Process {i.pid}",end=" | ")
-    print()
-    t.pop(0)
-    x=0
-    l=l[::-1]
-    t=t[::-1]
-    for i in lst:
-        lst[lst.index(i)].FinalTime=t[l.index(i)]
-        lst[lst.index(i)].TurnAroundTime=lst[lst.index(i)].FinalTime-lst[lst.index(i)].ArrivalTime
-        lst[lst.index(i)].WaitingTime=lst[lst.index(i)].TurnAroundTime-lst[lst.index(i)].BurstTime
 
-    lst.sort(key=lambda x:x.pid)
+    # Second Phase: Finish remaining processes
+    while ready_queue:
+        current_proc = ready_queue.pop(0)
+        current_proc.RemainingTime -= time_quantum
+        executed_order.append(current_proc)
+
+        if current_proc.RemainingTime > 0:
+            ready_queue.append(current_proc)
+            timeline.append(timeline[-1] + time_quantum)
+        else:
+            if current_proc.RemainingTime == 0:
+                timeline.append(timeline[-1] + time_quantum)
+            else:
+                timeline.append(timeline[-1] + time_quantum + current_proc.RemainingTime)
+
+    # Gantt Chart Output
+    print("\nGantt Chart:")
+    for proc in executed_order:
+        print(f"Process {proc.pid}", end=" | ")
+    print()
+
+    # Calculate Completion, TAT, WT
+    timeline.pop(0)
+    executed_order.reverse()
+    timeline.reverse()
+
+    for proc in process_list:
+        idx = executed_order.index(proc)
+        proc.FinalTime = timeline[idx]
+        proc.TurnAroundTime = proc.FinalTime - proc.ArrivalTime
+        proc.WaitingTime = proc.TurnAroundTime - proc.BurstTime
+
+    # Sort by PID for output
+    process_list.sort(key=lambda p: p.pid)
+
 
 # Driver Code
-
 processes = [
-        Process(1, 0, 5),
-        Process(2, 1, 3),
-        Process(3, 2, 1),
-        Process(4, 3, 4),
-        Process(5, 0, 2),
-    ]
+    Process(1, 0, 5),
+    Process(2, 1, 3),
+    Process(3, 2, 1),
+    Process(4, 3, 4),
+    Process(5, 0, 2),
+]
 
-roundRobin(processes,2)
-print("_"*100)
-for i in processes:
-    print(i)
+roundRobin(processes, time_quantum=2)
+print("_" * 100)
+for p in processes:
+    print(p)
