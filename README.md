@@ -10,6 +10,9 @@
 🛠️Operating-System-Algorithms-Implementation
 ├── 📂 CPU_Scheduling
 ├── 📂 Memory_Management
+     ├── 📂 Contiguous_Memory_Allocation
+     ├── 📂 Paging
+     ├── 📂 Segmentation
 ├── 📂 Page_Replacement
 ├── .gitignore
 ├── LICENSE
