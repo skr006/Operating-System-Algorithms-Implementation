@@ -9,6 +9,7 @@
 ```
 🛠️Operating-System-Algorithms-Implementation
 ├── 📂 CPU_Scheduling
+├── 📂 Memory_Management
 ├── 📂 Page_Replacement
 ├── .gitignore
 ├── LICENSE
